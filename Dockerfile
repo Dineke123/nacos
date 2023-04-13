@@ -1,20 +1,23 @@
+# 基础镜像
 FROM openjdk:8-jre-alpine
 
-# 安装必要的工具
-RUN apk add --no-cache curl net-tools bash
+# 作者信息
+LABEL maintainer="Your Name <your-email@example.com>"
 
-# 设置时区
-RUN apk add --no-cache tzdata && \
-    cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
-    echo "Asia/Shanghai" > /etc/timezone && \
-    apk del tzdata
+# 安装 Bash 和 Curl 工具
+RUN apk add --no-cache bash curl
 
 # 下载并解压 Nacos
-RUN curl -fsSL https://github.com/alibaba/nacos/releases/download/2.0.3/nacos-server-2.0.3.tar.gz -o nacos-server.tar.gz && \
+RUN curl -o nacos-server.tar.gz https://github.com/alibaba/nacos/releases/download/2.0.3/nacos-server-2.0.3.tar.gz && \
     tar -xzf nacos-server.tar.gz && \
-    rm -rf nacos-server.tar.gz && \
-    mv nacos-server-* nacos
+    rm nacos-server.tar.gz
 
-# 设置启动命令
-WORKDIR /nacos/bin
-CMD ["sh", "startup.sh"]
+# 设置环境变量
+ENV NACOS_HOME=/nacos-server
+ENV PATH=$NACOS_HOME/bin:$PATH
+
+# 暴露端口
+EXPOSE 8848 9555 9600
+
+# 启动 Nacos
+CMD ["sh", "/nacos-server/bin/startup.sh"]
