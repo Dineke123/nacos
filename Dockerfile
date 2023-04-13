@@ -1,9 +1,6 @@
 # 基于官方 Nacos 镜像构建自定义镜像
 FROM nacos/nacos-server:2.0.1
 
-# 安装 curl 和 net-tools
-RUN apt-get update && apt-get install -y curl net-tools
-
 # 设置环境变量
 ENV MODE=standalone \
     PREFER_HOST_MODE=hostname \
