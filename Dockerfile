@@ -1,17 +1,20 @@
-# 基于官方 Nacos 镜像构建自定义镜像
-FROM nacos/nacos-server:2.0.1
+FROM openjdk:8-jre-alpine
 
-# 设置环境变量
-ENV MODE=standalone \
-    PREFER_HOST_MODE=hostname \
-    NACOS_SERVERS=localhost:8848 \
-    NACOS_SERVER_PORT=8848 \
-    NACOS_APPLICATION_PORT=8848 \
-    NACOS_APPLICATION_GROUP=default \
-    NACOS_APPLICATION_NAME=nacos-docker
+# 安装必要的工具
+RUN apk add --no-cache curl net-tools bash
 
-# 暴露端口
-EXPOSE 8848 9848
+# 设置时区
+RUN apk add --no-cache tzdata && \
+    cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo "Asia/Shanghai" > /etc/timezone && \
+    apk del tzdata
 
-# 运行容器时执行的命令
-CMD ["sh", "-c", "cd /home/nacos/bin && sh startup.sh -m $MODE"]
+# 下载并解压 Nacos
+RUN curl -fsSL https://github.com/alibaba/nacos/releases/download/2.0.3/nacos-server-2.0.3.tar.gz -o nacos-server.tar.gz && \
+    tar -xzf nacos-server.tar.gz && \
+    rm -rf nacos-server.tar.gz && \
+    mv nacos-server-* nacos
+
+# 设置启动命令
+WORKDIR /nacos/bin
+CMD ["sh", "startup.sh"]
